@@ -12,7 +12,7 @@ import NotificationPage from "./pages/NotificationPage";
 import { axiosInstance } from "./lib/axios";
 import { useQuery } from "@tanstack/react-query";
 
-const App = () => {
+function App() {
   const { data: authUser, isLoading } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
@@ -54,17 +54,17 @@ const App = () => {
           element={authUser ? <NetworkPage /> : <Navigate to="/login" />}
         />
         <Route
-          path="/posts"
+          path="/post/:postId"
           element={authUser ? <PostPage /> : <Navigate to="/login" />}
         />
         <Route
-          path="/profile"
+          path="/profile/:username"
           element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
         />
       </Routes>
       <Toaster />
     </Layout>
   );
-};
+}
 
 export default App;

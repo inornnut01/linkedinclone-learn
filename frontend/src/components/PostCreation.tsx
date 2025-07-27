@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
 import { Image, Loader } from "lucide-react";
+import type { AxiosError } from "axios";
 
 const PostCreation = ({ user }: { user: User }) => {
   const [content, setContent] = useState("");
@@ -26,8 +27,8 @@ const PostCreation = ({ user }: { user: User }) => {
       toast.success("Post created successfully");
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
-    onError: (error: any) => {
-      toast.error(error.response.data.message || "Failed to create post");
+    onError: (error: AxiosError<{ error: string }>) => {
+      toast.error(error.response?.data?.error || "Failed to create post");
     },
   });
 

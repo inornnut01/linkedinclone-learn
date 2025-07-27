@@ -14,7 +14,7 @@ export const sendConnectionRequest = async (req, res) => {
         .json({ message: "You cannot send a connection request to yourself" });
     }
 
-    if (req.user.connections.include(userId)) {
+    if (req.user.connections.includes(userId)) {
       return res
         .status(400)
         .json({ message: "You are already connected to this user" });

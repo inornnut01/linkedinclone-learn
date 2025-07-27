@@ -15,18 +15,21 @@ export interface User {
 }
 
 export interface Experience {
+  _id?: string;
   title: string;
   company: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   description: string;
+  currentlyWorking: boolean;
 }
 
 export interface Education {
+  _id?: string;
   school: string;
   fieldOfStudy: string;
-  startYear: number;
-  endYear: number;
+  startYear: string;
+  endYear: string;
 }
 
 export interface Post {
@@ -43,20 +46,21 @@ export interface Post {
 export interface Comment {
   _id: string;
   content: string;
-  createdAt: Date;
+  createAt: Date;
   user: User;
 }
 
-export interface notification {
+export interface Notification {
   _id: string;
   recipient: User;
   type: string;
   relatedUser: User;
   relatedPost: Post;
   read: boolean;
+  createdAt: Date;
 }
 
-export interface connectionRequest {
+export interface ConnectionRequest {
   _id: string;
   sender: User;
   recipient: User;

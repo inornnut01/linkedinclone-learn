@@ -49,14 +49,15 @@ export const updateProfile = async (req, res) => {
       "profilePicture",
       "bannerImg",
       "skills",
-      "experience",
+      "experiences",
       "education",
     ];
 
     const updatedData = {};
 
     for (const field of allowedFields) {
-      if (req.body[field]) {
+      // adjust
+      if (req.body.hasOwnProperty(field)) {
         updatedData[field] = req.body[field];
       }
     }

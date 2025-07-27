@@ -2,16 +2,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import { Link } from "react-router-dom";
 import { Bell, Home, LogOut, User, Users } from "lucide-react";
-import type { notification, User as UserType } from "../types/index";
+import type { Notification, User as UserType } from "../types/index";
 
 const Navbar = () => {
-  const { data: authUser } = useQuery<UserType>({ queryKey: ["authUser"] });
+  const { data: authUser } = useQuery<UserType>({
+    queryKey: ["authUser"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/auth/me");
+      return response.data;
+    },
+  });
   const queryClient = useQueryClient();
 
   const { data: notifications } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
       const response = await axiosInstance.get("/notifications");
+
       return response.data;
     },
     enabled: !!authUser,
@@ -31,14 +38,15 @@ const Navbar = () => {
       await axiosInstance.post("/auth/logout");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      // adjust
+      queryClient.setQueryData(["authUser"], null);
     },
   });
 
-  const unreadNotificationCount = notifications?.data?.filter(
-    (notif: notification) => !notif.read
+  const unreadNotificationCount = notifications?.filter(
+    (notif: Notification) => !notif.read
   ).length;
-  const unreadConnectionRequestsCount = connectionRequests?.data?.length;
+  const unreadConnectionRequestsCount = connectionRequests?.length;
 
   return (
     <nav className="bg-secondary shadow-md sticky top-0 z-10">

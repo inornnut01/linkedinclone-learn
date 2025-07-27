@@ -98,7 +98,7 @@ export const createComment = async (req, res) => {
 
     const post = await Post.findByIdAndUpdate(
       postId,
-      { $push: { comments: { content, user: req.user._id } } },
+      { $push: { comments: { user: req.user._id, content } } },
       { new: true }
     ).populate("author", "name email username headline profilePicture");
 

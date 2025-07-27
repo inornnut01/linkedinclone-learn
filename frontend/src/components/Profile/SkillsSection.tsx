@@ -1,0 +1,105 @@
+import { useState } from "react";
+import type { User as UserType } from "../../types/index";
+import { X } from "lucide-react";
+
+const SkillsSection = ({
+  userData,
+  isOwnProfile,
+  onSave,
+}: {
+  userData: UserType;
+  isOwnProfile: boolean;
+  onSave: (data: Partial<UserType>) => void;
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [skills, setSkills] = useState(userData.skills || []);
+  const [newSkill, setNewSkill] = useState("");
+
+  const handleAddSkill = () => {
+    if (newSkill && !skills.includes(newSkill)) {
+      setSkills([...skills, newSkill]);
+      setNewSkill("");
+    }
+  };
+
+  const handleDeleteSkill = (skill: string) => {
+    setSkills(skills.filter((s) => s !== skill));
+  };
+
+  const handleSave = () => {
+    onSave({ skills });
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="bg-white shadow rounded-lg p-6">
+      <h2 className="text-xl font-semibold mb-4">Skills</h2>
+      <div className="flex flex-wrap">
+        {skills.map((skill, index) => (
+          <span
+            key={index}
+            className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm mr-2 mb-2 flex items-center"
+          >
+            {skill}
+            {isEditing && (
+              <button
+                onClick={() => handleDeleteSkill(skill)}
+                className="ml-2 text-red-500"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </span>
+        ))}
+      </div>
+      {isEditing && (
+        <div className="mt-4 flex gap-2">
+          <input
+            type="text"
+            placeholder="New Skill"
+            value={newSkill}
+            onChange={(e) => setNewSkill(e.target.value)}
+            className="flex-grow p-2 border rounded-l"
+          />
+          <button
+            onClick={handleAddSkill}
+            className="btn btn-primary text-white py-2 px-4 rounded-r hover:bg-primary-dark transition duration-300"
+          >
+            Add Skill
+          </button>
+        </div>
+      )}
+
+      {isOwnProfile && (
+        <>
+          {isEditing ? (
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={handleSave}
+                className="mt-4 btn btn-primary text-white py-2 px-4 rounded hover:bg-primary-dark transition duration-300"
+              >
+                Save Changes
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="btn btn-outline mt-4 text-black py-2 px-4 rounded hover:bg-gray-200
+             transition duration-300"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="mt-4 btn btn-outline text-primary hover:text-primary-dark transition duration-300"
+            >
+              Edit Skills
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default SkillsSection;

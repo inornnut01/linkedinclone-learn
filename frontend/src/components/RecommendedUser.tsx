@@ -4,18 +4,14 @@ import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { Check, Clock, UserCheck, UserPlus, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import type { AxiosError } from "axios";
 
 const RecommendedUser = ({ user }: { user: User }) => {
   const queryClient = useQueryClient();
 
   const { data: connectionStatus, isLoading } = useQuery({
     queryKey: ["connectionStatus", user._id],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `/connections/status/${user._id}`
-      );
-      return response.data;
-    },
+    queryFn: () => axiosInstance.get(`/connections/status/${user._id}`),
   });
 
   const { mutate: sendConnectionRequest } = useMutation({
@@ -27,35 +23,35 @@ const RecommendedUser = ({ user }: { user: User }) => {
         queryKey: ["connectionStatus", user._id],
       });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ error: string }>) => {
       toast.error(error.response?.data?.error || "An error occurred");
     },
   });
 
   const { mutate: acceptRequest } = useMutation({
     mutationFn: (requestId: string) =>
-      axiosInstance.post(`/connections/accept/${requestId}`),
+      axiosInstance.put(`/connections/accept/${requestId}`),
     onSuccess: () => {
       toast.success("Connection request accepted successfully");
       queryClient.invalidateQueries({
         queryKey: ["connectionStatus", user._id],
       });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ error: string }>) => {
       toast.error(error.response?.data?.error || "An error occurred");
     },
   });
 
   const { mutate: rejectRequest } = useMutation({
     mutationFn: (requestId: string) =>
-      axiosInstance.post(`/connections/reject/${requestId}`),
+      axiosInstance.put(`/connections/reject/${requestId}`),
     onSuccess: () => {
       toast.success("Connection request rejected successfully");
       queryClient.invalidateQueries({
         queryKey: ["connectionStatus", user._id],
       });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ error: string }>) => {
       toast.error(error.response?.data?.error || "An error occurred");
     },
   });
@@ -64,7 +60,7 @@ const RecommendedUser = ({ user }: { user: User }) => {
     if (isLoading) {
       return (
         <button
-          className="px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-500"
+          className="btn px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-500"
           disabled
         >
           Loading...
@@ -76,7 +72,7 @@ const RecommendedUser = ({ user }: { user: User }) => {
       case "pending":
         return (
           <button
-            className="px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-500"
+            className="btn px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-500"
             disabled
           >
             <Clock size={16} className="mr-1" />
@@ -85,7 +81,7 @@ const RecommendedUser = ({ user }: { user: User }) => {
         );
       case "received":
         return (
-          <div className="flex gap-2 justify-center">
+          <div className="btn flex gap-2 justify-center">
             <button
               onClick={() => acceptRequest(connectionStatus.data.requestId)}
               className={`rounded-full p-1 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white`}
@@ -103,7 +99,7 @@ const RecommendedUser = ({ user }: { user: User }) => {
       case "connected":
         return (
           <button
-            className="px-3 py-1 rounded-full text-sm bg-green-500 text-white flex items-center"
+            className="btn px-3 py-1 rounded-full text-sm bg-green-500 text-white flex items-center"
             disabled
           >
             <UserCheck size={16} className="mr-1" />
@@ -113,7 +109,7 @@ const RecommendedUser = ({ user }: { user: User }) => {
       default:
         return (
           <button
-            className="px-3 py-1 rounded-full text-sm border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200 flex items-center"
+            className="btn px-3 py-1 rounded-full text-sm border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200 flex items-center"
             onClick={handleConnect}
           >
             <UserPlus size={16} className="mr-1" />

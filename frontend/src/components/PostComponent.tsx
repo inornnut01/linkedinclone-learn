@@ -14,13 +14,20 @@ import {
   Trash2,
 } from "lucide-react";
 import PostAction from "./PostAction";
+import type { AxiosError } from "axios";
 
-const Post = ({ post }: { post: Post }) => {
+const PostComponent = ({ post }: { post: Post }) => {
   const { postId } = useParams();
 
-  const { data: authUser } = useQuery<User>({ queryKey: ["authUser"] });
+  const { data: authUser } = useQuery<User>({
+    queryKey: ["authUser"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/auth/me");
+      return response.data;
+    },
+  });
   const [showComments, setShowComments] = useState<boolean>(false);
-  const [newComment, setNewComment] = useState<string>("");
+  const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState<Comment[]>(post.comments || []);
   const isOwner = authUser?._id === post.author._id;
   const isLiked = post.likes.includes(authUser?._id || "");
@@ -29,22 +36,22 @@ const Post = ({ post }: { post: Post }) => {
 
   const { mutate: deletePost, isPending: isDeletingPost } = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.delete(`/posts/delete/${postId}`);
+      const response = await axiosInstance.delete(`/posts/delete/${post._id}`);
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       toast.success("Post deleted successfully");
     },
-    onError: (error: any) => {
-      toast.error(error.response.data.message || "Failed to delete post");
+    onError: (error: AxiosError<{ error: string }>) => {
+      toast.error(error.response?.data?.error || "Failed to delete post");
     },
   });
 
   const { mutate: createCommend, isPending: isAddingComment } = useMutation({
-    mutationFn: async (content: string) => {
-      const response = await axiosInstance.post(`/posts/${postId}/comment`, {
-        content,
+    mutationFn: async (newComment: string) => {
+      const response = await axiosInstance.post(`/posts/${post._id}/comment`, {
+        content: newComment,
       });
       return response.data;
     },
@@ -52,14 +59,14 @@ const Post = ({ post }: { post: Post }) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       toast.success("Comment added successfully");
     },
-    onError: (error: any) => {
-      toast.error(error.response.data.message || "Failed to add comment");
+    onError: (error: AxiosError<{ error: string }>) => {
+      toast.error(error.response?.data?.error || "Failed to add comment");
     },
   });
 
   const { mutate: likePost, isPending: isLikingPost } = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.post(`/posts/${postId}/like`);
+      const response = await axiosInstance.post(`/posts/${post._id}/like`);
       return response.data;
     },
     onSuccess: () => {
@@ -92,7 +99,7 @@ const Post = ({ post }: { post: Post }) => {
             name: authUser?.name || "",
             profilePicture: authUser?.profilePicture || "",
           },
-          createdAt: new Date(),
+          createAt: new Date(),
         },
       ]);
     }
@@ -180,17 +187,17 @@ const Post = ({ post }: { post: Post }) => {
                 className="mb-2 bg-base-100 p-2 rounded flex items-start"
               >
                 <img
-                  src={comment.user.profilePicture || "/avatar.png"}
-                  alt={comment.user.name}
+                  src={comment.user?.profilePicture || "/avatar.png"}
+                  alt={comment.user?.name}
                   className="w-8 h-8 rounded-full mr-2 flex-shrink-0"
                 />
                 <div className="flex-grow">
                   <div className="flex items-center mb-1">
                     <span className="font-semibold mr-2">
-                      {comment.user.name}
+                      {comment.user?.name}
                     </span>
                     <span className="text-xs text-info">
-                      {formatDistanceToNow(new Date(comment.createdAt))}
+                      {formatDistanceToNow(new Date(comment.createAt || ""))}
                     </span>
                   </div>
                   <p>{comment.content}</p>
@@ -225,4 +232,4 @@ const Post = ({ post }: { post: Post }) => {
   );
 };
 
-export default Post;
+export default PostComponent;

@@ -2,13 +2,19 @@ import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import Sidebar from "../components/Sidebar";
 import type { Post as PostType, User } from "../types/index";
-import PostCreation from "./PostCreation";
-import Post from "../components/Post";
+import PostCreation from "../components/PostCreation";
+import PostComponent from "../components/PostComponent";
 import { Users } from "lucide-react";
 import RecommendedUser from "../components/RecommendedUser";
 
 const HomePage = () => {
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const { data: authUser } = useQuery<User>({
+    queryKey: ["authUser"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/auth/me");
+      return response.data;
+    },
+  });
 
   const { data: recommendedUsers } = useQuery({
     queryKey: ["recommendedUsers"],
@@ -26,8 +32,6 @@ const HomePage = () => {
     },
   });
 
-  console.log("posts", posts);
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
       <div className="hidden lg:block lg:col-span-1">
@@ -39,7 +43,7 @@ const HomePage = () => {
         <PostCreation user={authUser as User} />
 
         {posts?.map((post: PostType) => (
-          <Post key={post._id} post={post} />
+          <PostComponent key={post._id} post={post} />
         ))}
 
         {posts?.length === 0 && (

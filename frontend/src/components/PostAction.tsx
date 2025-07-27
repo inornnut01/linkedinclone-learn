@@ -8,7 +8,7 @@ export default function PostAction({
   onClick: () => void | null;
 }) {
   return (
-    <button className="flex items-center" onClick={onClick}>
+    <button className="flex items-center cursor-pointer" onClick={onClick}>
       <span className="mr-1">{icon}</span>
       <span className="hidden sm:inline">{text}</span>
     </button>
