@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { axiosInstance } from "../../lib/axios";
 import toast from "react-hot-toast";
 import { Loader, Lock, User } from "lucide-react";
+import type { AxiosError } from "axios";
 
 type LoginData = {
   username: string;
@@ -15,7 +16,7 @@ const LoginForm = () => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: login, isLoading } = useMutation({
+  const { mutate: login, isPending } = useMutation({
     mutationFn: async (data: LoginData) => {
       const response = await axiosInstance.post("/auth/login", data);
       return response.data;
@@ -23,8 +24,8 @@ const LoginForm = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
-    onError: (error: any) => {
-      toast.error(error.response.data.message || "Something went wrong");
+    onError: (error: AxiosError<{ error: string }>) => {
+      toast.error(error.response?.data?.error || "Something went wrong");
     },
   });
 
@@ -65,10 +66,10 @@ const LoginForm = () => {
 
       <button
         type="submit"
-        disabled={isLoading}
+        disabled={isPending}
         className="btn btn-primary w-full text-white"
       >
-        {isLoading ? <Loader className="size-5 animate-spin" /> : "Login"}
+        {isPending ? <Loader className="size-5 animate-spin" /> : "Login"}
       </button>
     </form>
   );

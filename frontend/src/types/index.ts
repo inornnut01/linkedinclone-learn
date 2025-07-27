@@ -47,7 +47,7 @@ export interface Comment {
   _id: string;
   content: string;
   createAt: Date;
-  user: User;
+  user: Partial<User>;
 }
 
 export interface Notification {

@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios.ts";
 import toast from "react-hot-toast";
 import { LetterText, Loader, Lock, Mail, User } from "lucide-react";
+import type { AxiosError } from "axios";
 
 type SignUpData = {
   name: string;
@@ -18,7 +19,7 @@ const SignUpForm = () => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: signUpMutation, isLoading } = useMutation({
+  const { mutate: signUpMutation, isPending } = useMutation({
     mutationFn: async (data: SignUpData) => {
       const response = await axiosInstance.post("/auth/signup", data);
       return response.data;
@@ -27,8 +28,8 @@ const SignUpForm = () => {
       toast.success("Account created successfully");
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
-    onError: (error: any) => {
-      toast.error(error.response.data.message || "Something went wrong");
+    onError: (error: AxiosError<{ error: string }>) => {
+      toast.error(error.response?.data?.error || "Something went wrong");
     },
   });
 
@@ -96,10 +97,10 @@ const SignUpForm = () => {
 
       <button
         type="submit"
-        disabled={isLoading}
+        disabled={isPending}
         className="btn btn-primary w-full text-white"
       >
-        {isLoading ? (
+        {isPending ? (
           <Loader className="size-5 animate-spin" />
         ) : (
           "Agree & Join"

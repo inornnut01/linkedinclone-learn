@@ -1,4 +1,4 @@
-import type { Post, Comment, User } from "../types/index";
+import type { Post, Comment, User as UserType } from "../types/index";
 import { Link, useParams } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -19,7 +19,7 @@ import type { AxiosError } from "axios";
 const PostComponent = ({ post }: { post: Post }) => {
   const { postId } = useParams();
 
-  const { data: authUser } = useQuery<User>({
+  const { data: authUser } = useQuery<UserType>({
     queryKey: ["authUser"],
     queryFn: async () => {
       const response = await axiosInstance.get("/auth/me");
@@ -93,6 +93,7 @@ const PostComponent = ({ post }: { post: Post }) => {
       setComments([
         ...comments,
         {
+          _id: Date.now().toString(),
           content: newComment,
           user: {
             _id: authUser?._id || "",
